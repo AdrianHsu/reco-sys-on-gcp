@@ -7,6 +7,13 @@ from urllib.request import urlretrieve
 import zipfile
 import zlib
 
+MOVIE_URL = "http://files.grouplens.org/datasets/movielens/ml-100k.zip"
+# MOVIE_URL = "http://files.grouplens.org/datasets/movielens/ml-25m.zip"
+UNZIP_FOLDER = "ml-100k"
+# UNZIP_FOLDER = "ml-25m"
+FILENAME = "u.data"
+# FILENAME = "ratings.csv"
+
 def run(data_sources, zip_filepath, data_name, data_dir):
   """Extracts the specified number of data files."""
   if not tf.gfile.Exists(data_dir):
@@ -20,11 +27,7 @@ def run(data_sources, zip_filepath, data_name, data_dir):
       zip_ref = zipfile.ZipFile(zip_filepath, "r")
       zip_ref.extractall() # store locally
 
-      print("Done. Dataset contains:")
-      print(zip_ref.read('ml-100k/u.info'))
-
-      f.write(zip_ref.read('ml-100k/u.data')) # write to GCS
-
+      f.write(zip_ref.read(os.path.join(UNZIP_FOLDER, FILENAME))) # write to GCS
       print('Extracted {}'.format(data_file))
   else:
     print('Found {}'.format(data_file))
@@ -45,7 +48,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--data-sources',
       required=False,
-      default='http://files.grouplens.org/datasets/movielens/ml-100k.zip')
+      default=MOVIE_URL)
 
   parser.add_argument(
       '--zip-filepath',
@@ -55,7 +58,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--data-name',
       required=False,
-      default='u.data')
+      default='ratings.csv')
 
   args = parser.parse_args()
 

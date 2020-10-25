@@ -57,8 +57,19 @@ function run {
 }
 
 # Extract the data files
-echo '>> Extracting data'
-run python data-extractor.py \
+# echo '>> Extracting data'
+# run python data-extractor.py \
+#   --work-dir $WORK_DIR
+# echo ''
+
+
+# Preprocess the datasets using Apache Beam's DataflowRunner
+echo '>> Preprocessing'
+run python preprocess.py \
+  --project $PROJECT \
+  --runner DataflowRunner \
+  --temp_location $WORK_DIR/beam-temp \
+  --setup_file ./setup.py \
+  --region $REGION \
   --work-dir $WORK_DIR
 echo ''
-
