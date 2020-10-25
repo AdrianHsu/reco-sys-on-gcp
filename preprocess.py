@@ -13,6 +13,31 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 FILENAME = "ratings.csv"
 
+class DataToTfExampleDoFn(beam.DoFn):
+  """
+    Convert Data to TFExample
+  """
+  def __init__(self):
+    pass
+
+  @staticmethod
+  def _int64_feature(value):
+    """
+        Get int64 feature
+    """
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+  def process(self, data_tuple):
+    """
+      Convert data to tf-example
+    """
+    example = tf.train.Example(features=tf.train.Features(
+        feature={'user': self._int64_feature(data_tuple['user']),
+                 'item': self._int64_feature(data_tuple['item']),
+                 'rating': self._int64_feature(data_tuple['rating']),
+                 }))
+    yield example
+
 def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
 
   if beam_options and not isinstance(beam_options, PipelineOptions):
@@ -49,23 +74,27 @@ def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
       # | 'Write to GCS' >> beam.io.textio.WriteToText(os.path.join(data_dir, "processed"))
     )
 
+    data_to_tfexample = DataToTfExampleDoFn()
+
     train_dataset, eval_dataset = (
       dataset
+      | 'DataToTfExample' >> beam.ParDo(data_to_tfexample)
+      | 'SerializeProto' >> beam.Map(lambda x: x.SerializeToString())
       | 'Split dataset' >> beam.Partition(partitioning, 2, eval_percent) # train, eval -> 2
     )
 
     train_dataset_prefix = os.path.join(train_dataset_dir, 'part')
     _ = (
       train_dataset
-      # | 'Write train dataset' >> tfrecordio.WriteToTFRecord(train_dataset_prefix)
-      | 'Write train dataset' >> beam.io.textio.WriteToText(train_dataset_prefix)
+      | 'Write train dataset' >> tfrecordio.WriteToTFRecord(train_dataset_prefix)
+      # | 'Write train dataset' >> beam.io.textio.WriteToText(train_dataset_prefix)
     )
 
     eval_dataset_prefix = os.path.join(eval_dataset_dir, 'part')
     _ = ( 
       eval_dataset
-      # | 'Write eval dataset' >> tfrecordio.WriteToTFRecord(eval_dataset_prefix)
-      | 'Write eval dataset' >> beam.io.textio.WriteToText(eval_dataset_prefix)
+      | 'Write eval dataset' >> tfrecordio.WriteToTFRecord(eval_dataset_prefix)
+      # | 'Write eval dataset' >> beam.io.textio.WriteToText(eval_dataset_prefix)
     )
 
 
