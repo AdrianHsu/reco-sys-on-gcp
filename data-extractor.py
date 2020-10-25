@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import pickle
 import tensorflow as tf
 from urllib.request import urlretrieve
 import zipfile
@@ -14,6 +15,13 @@ UNZIP_FOLDER = "ml-100k"
 FILENAME = "u.data"
 # FILENAME = "ratings.csv"
 
+
+def dump(obj, filename):
+  """ Wrapper to dump an object to a file."""
+  with tf.io.gfile.GFile(filename, 'wb') as f:
+    pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 def run(data_sources, zip_filepath, data_name, data_dir):
   """Extracts the specified number of data files."""
   if not tf.gfile.Exists(data_dir):
@@ -22,13 +30,13 @@ def run(data_sources, zip_filepath, data_name, data_dir):
   data_file = os.path.join(data_dir, data_name)
 
   if not tf.gfile.Exists(data_file):
-    with tf.gfile.Open(data_file, 'w') as f:
-      urlretrieve(data_sources, zip_filepath)
-      zip_ref = zipfile.ZipFile(zip_filepath, "r")
-      zip_ref.extractall() # store locally
+    urlretrieve(data_sources, zip_filepath)
+    zip_ref = zipfile.ZipFile(zip_filepath, "r")
+    zip_ref.extractall() # store locally
+    obj = zip_ref.read(os.path.join(UNZIP_FOLDER, FILENAME))
 
-      f.write(zip_ref.read(os.path.join(UNZIP_FOLDER, FILENAME))) # write to GCS
-      print('Extracted {}'.format(data_file))
+    dump(obj, data_file)
+    print('Extracted {}'.format(data_file))
   else:
     print('Found {}'.format(data_file))
 
