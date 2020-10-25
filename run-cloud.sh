@@ -57,10 +57,10 @@ function run {
 }
 
 # Extract the data files
-echo '>> Extracting data'
-run python data-extractor.py \
-  --work-dir $WORK_DIR
-echo ''
+# echo '>> Extracting data'
+# run python data-extractor.py \
+#   --work-dir $WORK_DIR
+# echo ''
 
 
 # Preprocess the datasets using Apache Beam's DataflowRunner
@@ -73,3 +73,20 @@ echo ''
 #   --region $REGION \
 #   --work-dir $WORK_DIR
 # echo ''
+
+# Train and evaluate the model in AI Platform
+echo '>> Training'
+JOB="ahsu_movielens_$(date +%Y%m%d_%H%M%S)"
+BUCKET=$(echo $WORK_DIR | egrep -o gs://[^/]+)
+
+run gcloud ai-platform jobs submit training $JOB \
+  --module-name trainer.task \
+  --package-path trainer \
+  --staging-bucket $BUCKET \
+  --runtime-version 1.15 \
+  --region $REGION \
+  --python-version 3.7 \
+  --stream-logs \
+  -- \
+  --work-dir $WORK_DIR
+echo ''
