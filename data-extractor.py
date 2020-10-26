@@ -7,12 +7,17 @@ from urllib.request import urlretrieve
 import zipfile
 import zlib
 
+# 100k
 MOVIE_URL = "http://files.grouplens.org/datasets/movielens/ml-100k.zip"
-# MOVIE_URL = "http://files.grouplens.org/datasets/movielens/ml-25m.zip"
 UNZIP_FOLDER = "ml-100k"
-# UNZIP_FOLDER = "ml-25m"
 FILENAME = "u.data"
+DATANAME = "ratings-100k.csv"
+
+# 25m
+# MOVIE_URL = "http://files.grouplens.org/datasets/movielens/ml-25m.zip"
+# UNZIP_FOLDER = "ml-25m"
 # FILENAME = "ratings.csv"
+# DATANAME = "ratings-25m.csv"
 
 
 def run(data_sources, zip_filepath, data_name, data_dir):
@@ -58,7 +63,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--data-name',
       required=False,
-      default='ratings.csv')
+      default=DATANAME)
 
   args = parser.parse_args()
 

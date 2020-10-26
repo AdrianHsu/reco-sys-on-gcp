@@ -25,7 +25,7 @@ def load(data_dir):
 def read_tfrecord_fn(example_proto):
   features = {"user": tf.FixedLenFeature((), tf.int64, default_value=0),
               "item": tf.FixedLenFeature((), tf.int64, default_value=0),
-              "rating": tf.FixedLenFeature((), tf.int64, default_value=0)}
+              "rating": tf.FixedLenFeature((), tf.float64, default_value=0)}
 
   parsed_features = tf.io.parse_single_example(example_proto, features)
   return parsed_features['user'], parsed_features['item'], parsed_features['rating']

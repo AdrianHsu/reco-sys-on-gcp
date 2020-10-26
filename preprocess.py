@@ -11,7 +11,11 @@ import tensorflow_transform.beam.impl as beam_impl
 from apache_beam.io import tfrecordio
 from apache_beam.options.pipeline_options import PipelineOptions
 
-FILENAME = "ratings.csv"
+FILENAME = "ratings-100k.csv"
+SKIP_HEADER = 0
+
+# FILENAME = "ratings-25m.csv"
+# SKIP_HEADER = 1
 
 class DataToTfExampleDoFn(beam.DoFn):
   """
@@ -27,6 +31,13 @@ class DataToTfExampleDoFn(beam.DoFn):
     """
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
+  @staticmethod
+  def _float_feature(value):
+    """
+        Get float feature
+    """
+    return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
+
   def process(self, data_tuple):
     """
       Convert data to tf-example
@@ -34,7 +45,7 @@ class DataToTfExampleDoFn(beam.DoFn):
     example = tf.train.Example(features=tf.train.Features(
         feature={'user': self._int64_feature(data_tuple['user']),
                  'item': self._int64_feature(data_tuple['item']),
-                 'rating': self._int64_feature(data_tuple['rating']),
+                 'rating': self._float_feature(data_tuple['rating']),
                  }))
     yield example
 
@@ -57,7 +68,7 @@ def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
     """Converts string values to their appropriate type."""
     data['user'] = int(data['user']) - 1
     data['item'] = int(data['item']) - 1
-    data['rating'] = int(data['rating']) # string to
+    data['rating'] = float(data['rating']) # string to
     return data
 
   def partitioning(data, num_partitions, eval_percent):
@@ -67,7 +78,7 @@ def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
 
     dataset = (
       p
-      | 'Read from GCS' >> beam.io.ReadFromText(os.path.join(data_dir, FILENAME), skip_header_lines = 0)
+      | 'Read from GCS' >> beam.io.ReadFromText(os.path.join(data_dir, FILENAME), skip_header_lines = SKIP_HEADER)
       | 'Trim spaces' >> beam.Map(lambda x: x.split())
       | 'Format to dict' >> beam.Map(lambda x: {"user": x[0], "item": x[1], "rating": x[2]})
       | 'Shift by 1' >> beam.Map(shift_by_one)
