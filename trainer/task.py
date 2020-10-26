@@ -3,29 +3,41 @@
 import argparse
 import os
 import glob
+import collections 
 
 import tensorflow as tf
 import numpy as np
 
-def load(data_dir):
-  filenames = glob.glob(os.path.join(data_dir, "part-*"))
-  raw_dataset = tf.data.TFRecordDataset(filenames)
+tf.enable_eager_execution()
 
+USER_SHAPE = 943
+ITEM_SHAPE = 1682
+
+def load(data_dir):
+  # filenames = glob.glob(os.path.join(data_dir, "part-*"))
+  filenames = glob.glob(os.path.join("./", "train-dataset_part-*"))
+  print(filenames)
+  raw_dataset = tf.data.TFRecordDataset(filenames)
   return raw_dataset
 
-def build_rating_sparse_tensor(ratings_df):
-  """
-  Args:
-    ratings_df: a pd.DataFrame with `user_id`, `movie_id` and `rating` columns.
-  Returns:
-    a tf.SparseTensor representing the ratings matrix.
-  """
-  indices = ratings_df[['user_id', 'movie_id']].values
-  values = ratings_df['rating'].values
-  return tf.SparseTensor(
-      indices=indices,
-      values=values,
-      dense_shape=[users.shape[0], movies.shape[0]])
+def read_tfrecord_fn(example_proto):
+  features = {"input_feat": tf.SparseFeature(index_key=["user", "item"],
+              value_key="rating",
+              dtype=tf.int64,
+              size=[USER_SHAPE, ITEM_SHAPE])}
+
+  parsed_features = tf.parse_single_example(example_proto, features)
+  return parsed_features
+
+# @tf.function
+def build_rating_sparse_tensor(tfrecord_dataset, sess):
+
+  dataset = tfrecord_dataset.map(read_tfrecord_fn)
+  dataset = dataset.repeat()
+  iterator = iter(dataset)
+
+  print(iterator.get_next()['input_feat'])
+  return iterator.get_next()['input_feat']
 
 def sparse_mean_square_error(sparse_ratings, user_embeddings, movie_embeddings):
   """
@@ -51,7 +63,7 @@ def sparse_mean_square_error(sparse_ratings, user_embeddings, movie_embeddings):
 
 class CFModel(object):
   """Simple class that represents a collaborative filtering model"""
-  def __init__(self, embedding_vars, loss, metrics=None):
+  def __init__(self, embedding_vars, loss, metrics=None, sess=None):
     """Initializes a CFModel.
     Args:
       embedding_vars: A dictionary of tf.Variables.
@@ -63,7 +75,7 @@ class CFModel(object):
     self._loss = loss
     self._metrics = metrics
     self._embeddings = {k: None for k in embedding_vars}
-    self._session = None
+    self._session = sess
 
   @property
   def embeddings(self):
@@ -71,7 +83,7 @@ class CFModel(object):
     return self._embeddings
 
   def train(self, num_iterations=100, learning_rate=1.0, 
-            optimizer=tf.train.GradientDescentOptimizer):
+            optimizer=tf.compat.v1.train.GradientDescentOptimizer):
     """Trains the model.
     Args:
       iterations: number of iterations to run.
@@ -80,43 +92,39 @@ class CFModel(object):
     Returns:
       The metrics dictionary evaluated at the last iteration.
     """
-    with self._loss.graph.as_default():
-      opt = optimizer(learning_rate)
-      train_op = opt.minimize(self._loss)
-      local_init_op = tf.group(
-          tf.variables_initializer(opt.variables()),
-          tf.local_variables_initializer())
-      if self._session is None:
-        self._session = tf.Session()
-        with self._session.as_default():
-          self._session.run(tf.global_variables_initializer())
-          self._session.run(tf.tables_initializer())
-          tf.train.start_queue_runners()
+    opt = optimizer(learning_rate)
+    train_op = opt.minimize(self._loss)
+    local_init_op = tf.group(
+        tf.variables_initializer(opt.variables()),
+        tf.local_variables_initializer())
 
-    with self._session.as_default():
-      local_init_op.run()
-      iterations = []
-      metrics = self._metrics or ({},)
-      metrics_vals = [collections.defaultdict(list) for _ in self._metrics]
+    self._session.run(tf.global_variables_initializer())
+    self._session.run(tf.tables_initializer())
+    tf.train.start_queue_runners()
 
-      # Train and append results.
-      for i in range(num_iterations + 1):
-        _, results = self._session.run((train_op, metrics))
-        if (i % 10 == 0) or i == num_iterations:
-          print("\r iteration %d: " % i + ", ".join(
-                ["%s=%f" % (k, v) for r in results for k, v in r.items()]),
-                end='')
-          iterations.append(i)
-          for metric_val, result in zip(metrics_vals, results):
-            for k, v in result.items():
-              metric_val[k].append(v)
+    local_init_op.run()
+    iterations = []
+    metrics = self._metrics or ({},)
+    metrics_vals = [collections.defaultdict(list) for _ in self._metrics]
 
-      for k, v in self._embedding_vars.items():
-        self._embeddings[k] = v.eval()
+    # Train and append results.
+    for i in range(num_iterations + 1):
+      _, results = self._session.run((train_op, metrics))
+      if (i % 10 == 0) or i == num_iterations:
+        print("\r iteration %d: " % i + ", ".join(
+              ["%s=%f" % (k, v) for r in results for k, v in r.items()]),
+              end='')
+        iterations.append(i)
+        for metric_val, result in zip(metrics_vals, results):
+          for k, v in result.items():
+            metric_val[k].append(v)
 
-      return results
+    for k, v in self._embedding_vars.items():
+      self._embeddings[k] = v.eval()
 
-def build_model(train_dataset, eval_dataset, embedding_dim=3, init_stddev=1.):
+    return results
+
+def build_model(train_dataset, eval_dataset, sess, embedding_dim=3, init_stddev=1.):
   """
   Args:
     ratings: a DataFrame of the ratings
@@ -127,13 +135,14 @@ def build_model(train_dataset, eval_dataset, embedding_dim=3, init_stddev=1.):
   """
 
   # SparseTensor representation of the train and test datasets.
-  A_train = build_rating_sparse_tensor(train_dataset)
-  A_test = build_rating_sparse_tensor(eval_dataset)
+  A_train = build_rating_sparse_tensor(train_dataset, sess)
+  A_test = build_rating_sparse_tensor(eval_dataset, sess)
+
   # Initialize the embeddings using a normal distribution.
   U = tf.Variable(tf.random_normal(
-      [A_train.dense_shape[0], embedding_dim], stddev=init_stddev))
+      [USER_SHAPE, embedding_dim], stddev=init_stddev))
   V = tf.Variable(tf.random_normal(
-      [A_train.dense_shape[1], embedding_dim], stddev=init_stddev))
+      [ITEM_SHAPE, embedding_dim], stddev=init_stddev))
   train_loss = sparse_mean_square_error(A_train, U, V)
   test_loss = sparse_mean_square_error(A_test, U, V)
   metrics = {
@@ -144,16 +153,17 @@ def build_model(train_dataset, eval_dataset, embedding_dim=3, init_stddev=1.):
       "user_id": U,
       "movie_id": V
   }
-  return CFModel(embeddings, train_loss, [metrics])
+  return CFModel(embeddings, train_loss, [metrics], sess)
 
 def run(work_dir, max_iterations):
 
+  sess = tf.InteractiveSession()
   train_dataset = load(os.path.join(args.work_dir, 'train-dataset'))
   eval_dataset = load(os.path.join(args.work_dir, 'eval-dataset'))
 
   # Build the CF model and train it.
-  model = build_model(train_dataset, eval_dataset, embedding_dim=30, init_stddev=0.5)
-  model.train(num_iterations=num_iterations, learning_rate=10.)
+  model = build_model(train_dataset, eval_dataset, sess, embedding_dim=30, init_stddev=0.5)
+  model.train(num_iterations=max_iterations, learning_rate=10.)
 
 
 if __name__ == '__main__':
