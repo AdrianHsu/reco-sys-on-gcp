@@ -16,8 +16,8 @@ USER_SHAPE = 943
 ITEM_SHAPE = 1682
 
 def load(data_dir):
-  filenames = glob.glob(os.path.join(data_dir, "part-*"))
-  # filenames = glob.glob(os.path.join("./", "train-dataset_part-*"))
+  # filenames = glob.glob(os.path.join(data_dir, "part-*"))
+  filenames = glob.glob(os.path.join("./", "train-dataset_part-*"))
   print(filenames)
   raw_dataset = tf.data.TFRecordDataset(filenames)
   return raw_dataset
@@ -65,9 +65,9 @@ class MyModel(Model):
     super(MyModel, self).__init__()
     self.embedding_dim = embed_dim
     self.U = tf.Variable(tf.random.normal(
-        [USER_SHAPE, embed_dim], stddev=1.), trainable=True)
+        [USER_SHAPE, embed_dim], dtype=tf.int64, stddev=1.), trainable=True)
     self.V = tf.Variable(tf.random.normal(
-        [ITEM_SHAPE, embed_dim], stddev=1.), trainable=True)    
+        [ITEM_SHAPE, embed_dim], dtype=tf.int64, stddev=1.), trainable=True)    
 
 def build_model(train_dataset, eval_dataset, max_iterations, learning_rate=1, embed_dim = 3):
 
