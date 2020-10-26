@@ -11,11 +11,13 @@ import tensorflow_transform.beam.impl as beam_impl
 from apache_beam.io import tfrecordio
 from apache_beam.options.pipeline_options import PipelineOptions
 
-FILENAME = "ratings-100k.csv"
-SKIP_HEADER = 0
+# FILENAME = "ratings-100k.csv"
+# SKIP_HEADER = 0
+# SPLIT_CHAR=False
 
-# FILENAME = "ratings-25m.csv"
-# SKIP_HEADER = 1
+FILENAME = "ratings-25m.csv"
+SKIP_HEADER = 1
+SPLIT_CHAR=True
 
 class DataToTfExampleDoFn(beam.DoFn):
   """
@@ -79,7 +81,7 @@ def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
     dataset = (
       p
       | 'Read from GCS' >> beam.io.ReadFromText(os.path.join(data_dir, FILENAME), skip_header_lines = SKIP_HEADER)
-      | 'Trim spaces' >> beam.Map(lambda x: x.split())
+      | 'Trim spaces' >> beam.Map(lambda x: x.split(",") if SPLIT_CHAR else x.split())
       | 'Format to dict' >> beam.Map(lambda x: {"user": x[0], "item": x[1], "rating": x[2]})
       | 'Shift by 1' >> beam.Map(shift_by_one)
       # | 'Write to GCS' >> beam.io.textio.WriteToText(os.path.join(data_dir, "processed"))
