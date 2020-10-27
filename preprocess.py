@@ -11,13 +11,16 @@ import tensorflow_transform.beam.impl as beam_impl
 from apache_beam.io import tfrecordio
 from apache_beam.options.pipeline_options import PipelineOptions
 
-FILENAME = "ratings-100k.csv"
-SKIP_HEADER = 0
-SPLIT_CHAR=False
+# FILENAME = "ratings-100k.csv"
+# SKIP_HEADER = 0
+# SPLIT_CHAR=False
+# POSTFIX="-100k"
 
-# FILENAME = "ratings-25m.csv"
-# SKIP_HEADER = 1
-# SPLIT_CHAR=True
+FILENAME = "ratings-25m.csv"
+SKIP_HEADER = 1
+SPLIT_CHAR=True
+POSTFIX="-25m"
+
 
 class DataToTfExampleDoFn(beam.DoFn):
   """
@@ -62,9 +65,9 @@ def run(work_dir, beam_options, data_dir, eval_percent = 20.0):
   if not work_dir:
     raise ValueError('invalid work_dir')
 
-  tft_temp_dir = os.path.join(work_dir, 'tft-temp')
-  train_dataset_dir = os.path.join(work_dir, 'train-dataset')
-  eval_dataset_dir = os.path.join(work_dir, 'eval-dataset')
+  tft_temp_dir = os.path.join(work_dir, 'tft-temp' + POSTFIX)
+  train_dataset_dir = os.path.join(work_dir, 'train-dataset' + POSTFIX)
+  eval_dataset_dir = os.path.join(work_dir, 'eval-dataset' + POSTFIX)
 
   def shift_by_one(data):
     """Converts string values to their appropriate type."""

@@ -10,10 +10,31 @@ import numpy as np
 
 from tensorflow.keras import Model
 
+# 100k
+# USER_SHAPE = 943
+# ITEM_SHAPE = 1682
+# POSTFIX = "-100k"
+
+# 25m
+USER_SHAPE = 162550 # 162541
+ITEM_SHAPE = 209180 # 209171
+POSTFIX = "-25m"
+
+
 tf.enable_eager_execution()
 
-USER_SHAPE = 943
-ITEM_SHAPE = 1682
+tf.debugging.set_log_device_placement(True)
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    # Currently, memory growth needs to be the same across GPUs
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+  except RuntimeError as e:
+    # Memory growth must be set before GPUs have been initialized
+    print(e)
 
 def load(data_dir):
   filenames = tf.io.gfile.glob(os.path.join(data_dir, "part-*"))
@@ -119,8 +140,8 @@ def build_model(train_dataset, eval_dataset, max_iterations, learning_rate=1, em
 
 def run(work_dir, max_iterations):
   print(args.work_dir)
-  train_dataset = load(os.path.join(args.work_dir, 'train-dataset'))
-  eval_dataset = load(os.path.join(args.work_dir, 'eval-dataset'))
+  train_dataset = load(os.path.join(args.work_dir, 'train-dataset' + POSTFIX))
+  eval_dataset = load(os.path.join(args.work_dir, 'eval-dataset' + POSTFIX))
 
   model = build_model(train_dataset, eval_dataset, max_iterations)
 

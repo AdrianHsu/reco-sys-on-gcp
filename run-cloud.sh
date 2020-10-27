@@ -57,22 +57,22 @@ function run {
 }
 
 # Extract the data files
-echo '>> Extracting data'
-run python data-extractor.py \
-  --work-dir $WORK_DIR
-echo ''
+# echo '>> Extracting data'
+# run python data-extractor.py \
+#   --work-dir $WORK_DIR
+# echo ''
 
 
 # Preprocess the datasets using Apache Beam's DataflowRunner
-echo '>> Preprocessing'
-run python preprocess.py \
-  --project $PROJECT \
-  --runner DataflowRunner \
-  --temp_location $WORK_DIR/beam-temp \
-  --setup_file ./setup.py \
-  --region $REGION \
-  --work-dir $WORK_DIR
-echo ''
+# echo '>> Preprocessing'
+# run python preprocess.py \
+#   --project $PROJECT \
+#   --runner DataflowRunner \
+#   --temp_location $WORK_DIR/beam-temp \
+#   --setup_file ./setup.py \
+#   --region $REGION \
+#   --work-dir $WORK_DIR
+# echo ''
 
 # Train and evaluate the model in AI Platform
 echo '>> Training'
@@ -87,6 +87,8 @@ run gcloud ai-platform jobs submit training $JOB \
   --region $REGION \
   --python-version 3.7 \
   --stream-logs \
+  --scale-tier custom \
+  --master-machine-type n1-highmem-16 \
   -- \
   --work-dir $WORK_DIR
 echo ''
