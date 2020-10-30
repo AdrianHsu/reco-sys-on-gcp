@@ -60,6 +60,7 @@ $ tree
 ├── preprocess.py
 ├── run-cloud.sh
 ├── setup.py
+├── config.yaml
 └── trainer
     ├── __init__.py
     └── task.py
@@ -113,7 +114,6 @@ $ tree
 
 ## Model performance: MLE Loss function
 ![](fig/loss-func.png)
-
 
 ## Cloud Resources Utilization
 
@@ -184,13 +184,26 @@ $ tree
 * Machine Type: `n1-highmem-16`
 * Virtual CPUs: 16
 * Memory (GB): 104
-* 1 master node, 2 worker nodes
+* 1 master node, 4 worker nodes
 * Execution Time: 2 hr 26 min
 * Consumed ML units:  22.68
 
 ![](fig/4w-m.png)
 
 ![](fig/4w-w.png)
+
+
+
+### 4 workers + GPU: `ahsu_movielens_20201030_103028`
+
+* Dataset: MovieLens 25M
+* Machine Type: `n1-highmem-16`
+* Virtual CPUs: 16
+* Memory (GB): 104
+* 1 master node, 4 worker nodes
+* All nodes have 4 NVIDIA_TESLA_P100 gpu card each
+* Execution Time:
+* Consumed ML units: 
 
 
 

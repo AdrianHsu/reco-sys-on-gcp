@@ -1,0 +1,15 @@
+trainingInput:
+  scaleTier: CUSTOM
+  # Configure a master worker with 4 P100 GPUs
+  masterType: n1-highmem-16
+  masterConfig:
+    acceleratorConfig:
+      count: 4
+      type: NVIDIA_TESLA_P100
+  # Configure 4 workers, each with 4 P100 GPUs
+  workerCount: 4
+  workerType: n1-highmem-16
+  workerConfig:
+    acceleratorConfig:
+      count: 4
+      type: NVIDIA_TESLA_P100
