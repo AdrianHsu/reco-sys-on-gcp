@@ -31,7 +31,7 @@ MIT License
 - project name: `reco-sys-capstone`
 - GCS bucket name: `ahsu-movielens`
 - region: `us-central1`
-- AI platform job name: `"ahsu_movielens_$(date +%Y%m%d_%H%M%S)"`
+- AI platform job format: `"ahsu_movielens_$(date +%Y%m%d_%H%M%S)"`
 
 ## How-to
 
@@ -175,8 +175,8 @@ $ tree
 * Memory (GB): 104
 * 1 master node, 2 worker nodes
 
-* Execution Time: 
-* Consumed ML units: 
+* Execution Time: 2 hr 57 min
+* Consumed ML units: 15.53
 
 ### 4 workers: `ahsu_movielens_20201030_000018`
 
@@ -185,9 +185,14 @@ $ tree
 * Virtual CPUs: 16
 * Memory (GB): 104
 * 1 master node, 2 worker nodes
+* Execution Time: 2 hr 26 min
+* Consumed ML units:  22.68
 
-* Execution Time: 
-* Consumed ML units: 
+![](fig/4w-m.png)
+
+![](fig/4w-w.png)
+
+
 
 
 ## References

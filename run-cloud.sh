@@ -88,9 +88,13 @@ run gcloud ai-platform jobs submit training $JOB \
   --python-version 3.7 \
   --stream-logs \
   --scale-tier custom \
-  --master-machine-type n1-highmem-16 \
-  --worker-machine-type n1-highmem-16 \
-  --worker-count 4 \
+  --master-machine-type n1-highcpu-16 \
+  --master-accelerator count=4,type=nvidia-tesla-t4 \
+  --worker-count 9 \
+  --worker-machine-type n1-highcpu-16 \
+  --worker-accelerator count=4,type=nvidia-tesla-t4 \
+  --parameter-server-count 3 \
+  --parameter-server-machine-type n1-highmem-8 \
   -- \
   --work-dir $WORK_DIR
 echo ''
