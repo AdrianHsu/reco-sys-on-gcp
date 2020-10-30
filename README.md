@@ -48,11 +48,7 @@ $ tree
 .
 ├── README.md
 ├── data-extractor.py
-├── fig
-│   ├── 100k-util.png
-│   ├── 25m-util.png
-│   ├── dataflow.png
-│   └── loss-func.png
+├── fig/
 ├── gitpush.sh
 ├── loss.txt
 ├── movielens.zip
