@@ -128,7 +128,7 @@ $ tree
 * Execution Time: 6 min 26 sec
 * Consumed ML units: 0.06
 
-![](fig/100k.util.png)
+![](fig/100k-util.png)
 
 ### `ahsu_movielens_20201026_215825`
 
@@ -224,4 +224,5 @@ https://beam.apache.org/
 https://cloud.google.com/dataflow
 
 [8] Martın Abadi et al, TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems, 2015
+
 http://download.tensorflow.org/paper/whitepaper2015.pdf
