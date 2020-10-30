@@ -89,6 +89,8 @@ run gcloud ai-platform jobs submit training $JOB \
   --stream-logs \
   --scale-tier custom \
   --master-machine-type n1-highmem-16 \
+  --worker-machine-type n1-highmem-16 \
+  --worker-count 4 \
   -- \
   --work-dir $WORK_DIR
 echo ''

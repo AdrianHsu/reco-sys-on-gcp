@@ -11,15 +11,15 @@ import tensorflow_transform.beam.impl as beam_impl
 from apache_beam.io import tfrecordio
 from apache_beam.options.pipeline_options import PipelineOptions
 
-# FILENAME = "ratings-100k.csv"
-# SKIP_HEADER = 0
-# SPLIT_CHAR=False
-# POSTFIX="-100k"
+FILENAME = "ratings-100k.csv"
+SKIP_HEADER = 0
+SPLIT_CHAR=False
+POSTFIX="-100k"
 
-FILENAME = "ratings-25m.csv"
-SKIP_HEADER = 1
-SPLIT_CHAR=True
-POSTFIX="-25m"
+# FILENAME = "ratings-25m.csv"
+# SKIP_HEADER = 1
+# SPLIT_CHAR=True
+# POSTFIX="-25m"
 
 
 class DataToTfExampleDoFn(beam.DoFn):
