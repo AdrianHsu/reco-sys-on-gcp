@@ -30,4 +30,20 @@ $ # set up google cloud CLI tools
 $ ./run-cloud.sh
 ```
 
-##
+## Tree
+
+```Shell
+(ahsu) adrianhsu:~/Desktop/reco-sys-on-gcp (main)
+$ tree
+.
+├── README.md
+├── data-extractor.py
+├── gitpush.sh
+├── preprocess.py
+├── run-cloud.sh
+├── setup.py
+└── trainer
+    ├── __init__.py
+    └── task.py
+
+```
