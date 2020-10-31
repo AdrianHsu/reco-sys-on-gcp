@@ -190,21 +190,6 @@ $ tree
 
 
 
-### 4 workers + GPU: `ahsu_movielens_20201030_163755`
-
-* Dataset: MovieLens 25M
-* Machine Type: `n1-standard-16`
-* Virtual CPUs: 16
-* Memory (GB): 60
-* 1 master node, 2 worker nodes
-* All nodes have 2 NVIDIA_TESLA_P100 gpu card each
-* Waiting for resources: 1 hr 16 min
-* Execution Time: 
-* Consumed ML units: 
-
-
-
-
 ## References
 
 
