@@ -174,7 +174,7 @@ $ tree
 * Execution Time: 2 hr 57 min
 * Consumed ML units: 15.53
 
-### 4 workers: `ahsu_movielens_20201030_000018`
+### 4 workers: `ahsu_movielens_20201030_000729`
 
 * Dataset: MovieLens 25M
 * Machine Type: `n1-highmem-16`
@@ -192,9 +192,7 @@ $ tree
 
 ## References
 
-
-[1] Herlocker, J., Konstan, J., Borchers, A., Riedl, J.. An Algorithmic Framework for Performing Collaborative Filtering. In Proceedings of the 1999 Conference on Research and Development in Information
-Retrieval. 1999.
+[1] Herlocker, J., Konstan, J., Borchers, A., Riedl, J.. An Algorithmic Framework for Performing Collaborative Filtering. In Proceedings of the Conference on Research and Development in Information Retrieval. 1999.
 
 http://files.grouplens.org/papers/algs.pdf
 
@@ -205,7 +203,6 @@ https://projecteuclid.org/download/pdf_1/euclid.aoms/1177729586
 [3] L´eon Bottou, Large-Scale Machine Learning with Stochastic Gradient Descent, COMPSTAT'2010
 
 https://leon.bottou.org/publications/pdf/compstat-2010.pdf
-
 
 [4] Google Cloud | Large-Scale Recommendation Systems - What and Why?
 
@@ -226,3 +223,7 @@ https://cloud.google.com/dataflow
 [8] Martın Abadi et al, TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems, 2015
 
 http://download.tensorflow.org/paper/whitepaper2015.pdf
+
+[9] Tyler Akidau et al, The Dataflow Model: A Practical Approach to Balancing Correctness, Latency, and Cost in Massive-Scale, Unbounded, Out-of-Order Data Processing
+
+https://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf
