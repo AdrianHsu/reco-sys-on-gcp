@@ -10,6 +10,10 @@
 
 MIT License
 
+## Project Report
+
+[Link](./Deep_Dive_Into_Production_ML_workflow_for_Recommender_System_based_on_GCP.pdf)
+
 ## System Requirement
 
 - Python 3.6
